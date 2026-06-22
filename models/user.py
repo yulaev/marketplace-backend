@@ -12,9 +12,9 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(30))
-    password: Mapped[str] = mapped_column(String(20))
-    email: Mapped[str] = mapped_column(String(50))
+    name: Mapped[str] = mapped_column(String(30), unique=True)
+    password_hash: Mapped[str] = mapped_column(String(60))
+    email: Mapped[str] = mapped_column(String(50), unique=True)
     role: Mapped[UserRole] = mapped_column()
 
     def __repr__(self):
