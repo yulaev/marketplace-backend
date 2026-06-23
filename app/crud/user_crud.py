@@ -43,8 +43,6 @@ def edit_user(token: Annotated[str, Depends(oauth2_scheme)], edit_body: UserEdit
     with get_session() as session:
         payload = validate_token(token=token)
         user = session.get(User, id)
-        print(payload.get("sub"))
-        print(user.name)
         if payload.get("sub") != user.name:
             raise HTTPException(status_code=403, detail="You are forbidden from performing this operation")
         
