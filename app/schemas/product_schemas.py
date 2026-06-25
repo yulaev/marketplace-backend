@@ -1,14 +1,14 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from decimal import Decimal
 
 class ProductCreate(BaseModel):
     name: str
     description: str | None = None
-    price: Decimal
-    quantity: int = 1
+    price: Decimal = Field(ge=0)
+    quantity: int = Field(default=1, ge=1)
 
 class ProductEdit(BaseModel):
     name: str | None = None
     description: str | None = None
-    price: Decimal | None = None
-    quantity: int | None = None
+    price: Decimal = Field(default=None, gt=0)
+    quantity: int = Field(default=None, ge=1)

@@ -1,7 +1,13 @@
-from sqlalchemy import Date, ForeignKey
+from sqlalchemy import ForeignKey, Enum
 from sqlalchemy.orm import Mapped, mapped_column
-from datetime import date
 from .base import Base
+import enum
+
+class OrderStatus(str, enum.Enum):
+    pending = "pending"
+    ordered = "ordered"
+    shipped = "shipped"
+    delivered = "delivered"
 
 class OrderItem(Base):
     __tablename__ = "order_items"
@@ -10,13 +16,14 @@ class OrderItem(Base):
     order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"))
     product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
     quantity: Mapped[int] = mapped_column()
+    status: Mapped[OrderStatus] = mapped_column(Enum(OrderStatus))
+
     
 
 class Order(Base):
     __tablename__ = "orders"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    order_date: Mapped[date] = mapped_column(Date)
     customer_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
     def __repr__(self):

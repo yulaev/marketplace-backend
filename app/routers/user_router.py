@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
-from app.crud import sign_up, sing_in, edit_user, delete_user
+from app.crud import sign_up, sing_in, edit_user, delete_user, get_user
 from app.schemas import UserCreate, UserEdit
 from typing import Annotated
 from app.utilities import oauth2_scheme
@@ -30,3 +30,8 @@ async def edit_user_r(token: Annotated[str, Depends(oauth2_scheme)], edit_body: 
 async def delete_user_r(token: Annotated[str, Depends(oauth2_scheme)], id: int):
     delete_user(token, id)
     return JSONResponse(status_code=200, content={"message": "User deleted succesfully"})
+
+@router.get("/{id}")
+def get_user_r(id: int):
+    user = get_user(id)
+    return user

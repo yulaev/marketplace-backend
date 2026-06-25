@@ -6,6 +6,7 @@ from fastapi import Depends, HTTPException
 from typing import Annotated
 from sqlalchemy import select
 
+
 def list_product(data: ProductCreate, token: Annotated[str, Depends(oauth2_scheme)]):
     with get_session() as sesssion:
         payload = validate_token(token)

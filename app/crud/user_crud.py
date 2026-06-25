@@ -1,5 +1,5 @@
 from app.database import get_session
-from app.schemas import UserCreate, UserEdit
+from app.schemas import UserCreate, UserEdit, UserPublic
 from app.models import User, UserRole
 from app.utilities import oauth2_scheme, get_access_token, authenticate_user, validate_token
 from fastapi import HTTPException, Depends
@@ -61,3 +61,16 @@ def delete_user(token: Annotated[str, Depends(oauth2_scheme)], id: int):
         
         session.delete(user)
         session.commit()
+
+def get_user(id: int):
+    with get_session() as session:
+        user = session.get(User, id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        user_display = UserPublic(
+            id = user.id,
+            name = user.name,
+            email = user.email,
+            role = user.role
+        )
+    return user_display
