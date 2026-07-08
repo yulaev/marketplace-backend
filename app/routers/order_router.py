@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
-from app.crud import add_to_cart, remove_from_cart, get_cart
+from app.crud import add_to_cart, remove_from_cart, get_cart, place_order
 from app.schemas import AddToCartBody, PublicOrder
 from typing import Annotated
 from app.utilities import oauth2_scheme
@@ -24,3 +24,8 @@ async def remove_from_cart_r(token: Annotated[str, Depends(oauth2_scheme)], id: 
 async def get_cart_r(token: Annotated[str, Depends(oauth2_scheme)]):
     cart = get_cart(token)
     return cart
+
+@router.patch("/place-order")
+async def place_order_r(token: Annotated[str, Depends(oauth2_scheme)]):
+    place_order(token)
+    return JSONResponse(status_code=200, content={"message": "Order placed succesfully"})

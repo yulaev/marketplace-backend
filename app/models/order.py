@@ -9,6 +9,15 @@ class OrderStatus(str, enum.Enum):
     shipped = "shipped"
     delivered = "delivered"
 
+    @property
+    def priority(self):
+        return {
+            OrderStatus.pending: 0,
+            OrderStatus.ordered: 1,
+            OrderStatus.shipped: 2,
+            OrderStatus.delivered: 3,
+        }[self]
+
 class OrderItem(Base):
     __tablename__ = "order_items"
 
@@ -28,5 +37,5 @@ class Order(Base):
     status: Mapped[OrderStatus] = mapped_column(Enum(OrderStatus))
 
     def __repr__(self):
-        return f"ID:{self.id}, DATE:{self.order_date}, ORDERED BY:{self.customer_id}"
+        return f"ID:{self.id}, ORDERED BY:{self.customer_id}"
     

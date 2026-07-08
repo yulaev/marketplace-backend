@@ -29,7 +29,8 @@ def add_to_cart(token: Annotated[str, Depends(oauth2_scheme)], item_data: AddToC
         order = session.scalar(o_stmt)
         if not order:
             order = Order (
-                customer_id = user.id
+                customer_id = user.id,
+                status = OrderStatus.pending
             )
 
             session.add(order)
@@ -89,3 +90,30 @@ def get_cart(token: Annotated[str, Depends(oauth2_scheme)]):
         i_stmt = select(OrderItem).where(OrderItem.order_id == order.id)
         cart = session.scalars(i_stmt).all()
         return cart
+    
+def update_order_status(cart: list[OrderItem]):
+    status = min(cart, key=lambda item: item.status.priority).status
+    return status
+    
+def place_order(token: Annotated[str, Depends(oauth2_scheme)]):
+    with get_session() as session:
+        payload = validate_token(token)
+
+        u_stmt = select(User).where(User.name == payload.get("sub"))
+        user = session.scalar(u_stmt)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        o_stmt = select(Order).where(Order.customer_id == user.id, Order.status == OrderStatus.pending)
+        order = session.scalar(o_stmt)
+        if not order:
+            raise HTTPException(status_code=404, detail="Cart not found(empty)")
+        
+        i_stmt = select(OrderItem).where(OrderItem.order_id == order.id)
+        cart = session.scalars(i_stmt).all()
+        for item in cart:
+            item.status = OrderStatus.ordered
+            session.commit()
+
+        order.status = update_order_status(cart)
+        session.commit()
