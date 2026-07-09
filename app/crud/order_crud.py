@@ -92,6 +92,9 @@ def get_cart(token: Annotated[str, Depends(oauth2_scheme)]):
         return cart
     
 def update_order_status(cart: list[OrderItem]):
+    # i will probably forget what this does if i dont add this
+    # basically min is being called on each items' in the cart priority
+    # and then it returns the item with the lowest one, on which .status is then called
     status = min(cart, key=lambda item: item.status.priority).status
     return status
     
@@ -111,7 +114,16 @@ def place_order(token: Annotated[str, Depends(oauth2_scheme)]):
         
         i_stmt = select(OrderItem).where(OrderItem.order_id == order.id)
         cart = session.scalars(i_stmt).all()
-        for item in cart:
+        
+        product_ids = [item.product_id for item in cart]
+        p_stmt = select(Product).where(Product.id.in_(product_ids))
+        products = session.scalars(p_stmt).all()
+        
+        for item, product in zip(cart,products):
+            if item.quantity > product.quantity:
+                raise HTTPException(status_code=400, detail="Item not available or quantity exceeds available")
+        for item, product in zip(cart,products):
+            product.quantity = product.quantity - item.quantity
             item.status = OrderStatus.ordered
             session.commit()
 
