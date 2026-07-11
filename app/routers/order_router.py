@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
-from app.crud import add_to_cart, remove_from_cart, get_cart, place_order, mark_as_shipped
+from app.crud import add_to_cart, remove_from_cart, get_cart, place_order, mark_as_shipped, mark_as_delivered
 from app.schemas import AddToCartBody, PublicOrder
 from typing import Annotated
 from app.utilities import oauth2_scheme
@@ -34,3 +34,8 @@ async def place_order_r(token: Annotated[str, Depends(oauth2_scheme)]):
 async def mark_as_shipped_r(token: Annotated[str, Depends(oauth2_scheme)], id: int):
     mark_as_shipped(token, id)
     return JSONResponse(status_code=200, content={"message": "Item marked as shipped"})
+
+@router.patch("/mark-as-delivered")
+async def mark_as_delivered_r(token: Annotated[str, Depends(oauth2_scheme)], id):
+    mark_as_delivered(token, id)
+    return JSONResponse(status_code=200, content={"message": "Item marked as delivered"})

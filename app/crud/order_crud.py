@@ -171,3 +171,36 @@ def mark_as_shipped(token: Annotated[str, Depends(oauth2_scheme)], id):
         order.status = update_order_status(cart)
         session.commit()
 
+def mark_as_delivered(token: Annotated[str, Depends(oauth2_scheme)], id):
+    with get_session() as session:
+        payload = validate_token(token)
+
+        u_stmt = select(User).where(User.name == payload.get("sub"))
+        user = session.scalar(u_stmt)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        if user.role != UserRole.customer:
+            raise HTTPException(status_code=403, detail="User forbidden from performing this operation")
+        
+        i_stmt = select(OrderItem).where(OrderItem.id == id)
+        item = session.scalar(i_stmt)
+        if not item:
+            raise HTTPException(status_code=404, detail="Item not found")
+        if item.status != OrderStatus.shipped:
+            raise HTTPException(status_code=403, detail="User forbidden from performing this operation")
+        
+        o_stmt = select(Order).where(Order.id == item.order_id)
+        order = session.scalar(o_stmt)
+        if not order:
+            raise HTTPException(status_code=404, detail="Order not found")
+
+        if order.customer_id != user.id:
+            raise HTTPException(status_code=403, detail="User forbidden from performing this operation")
+        
+        item.status = OrderStatus.delivered
+
+        c_stmt = select(OrderItem).where(OrderItem.order_id ==  order.id)
+        cart = session.scalars(c_stmt).all()
+        
+        order.status = update_order_status(cart)
+        session.commit()
