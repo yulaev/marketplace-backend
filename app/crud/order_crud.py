@@ -99,6 +99,7 @@ def update_order_status(cart: list[OrderItem]):
     return status
     
 # Customer specific action
+# First stage of the ordering process
 def place_order(token: Annotated[str, Depends(oauth2_scheme)]):
     with get_session() as session:
         payload = validate_token(token)
@@ -131,7 +132,8 @@ def place_order(token: Annotated[str, Depends(oauth2_scheme)]):
         order.status = update_order_status(cart)
         session.commit()
 
-#Seller specific action
+# Seller specific action
+# Second stage of the ordering process
 def mark_as_shipped(token: Annotated[str, Depends(oauth2_scheme)], id):
     with get_session() as session:
         payload = validate_token(token)
@@ -171,6 +173,8 @@ def mark_as_shipped(token: Annotated[str, Depends(oauth2_scheme)], id):
         order.status = update_order_status(cart)
         session.commit()
 
+# Customer specific action
+# Final stage of the ordering process
 def mark_as_delivered(token: Annotated[str, Depends(oauth2_scheme)], id):
     with get_session() as session:
         payload = validate_token(token)
