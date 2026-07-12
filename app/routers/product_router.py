@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
-from app.crud import list_product, edit_product, delete_product, get_product
-from app.schemas import ProductCreate, ProductEdit
+from app.crud import list_product, edit_product, restock_product, delete_product, get_product
+from app.schemas import ProductCreate, ProductEdit, ProductRestock
 from typing import Annotated
 from app.utilities import oauth2_scheme
 
@@ -19,6 +19,11 @@ async def list_product_r(data: ProductCreate, token: Annotated[str, Depends(oaut
 async def edit_product_r(token: Annotated[str, Depends(oauth2_scheme)], edit_body: ProductEdit, id: int):
     edit_product(token, edit_body, id)
     return JSONResponse(status_code=200, content={"message": "Listing succesfully edited"})
+
+@router.patch("/restock-product")
+async def edit_product_r(token: Annotated[str, Depends(oauth2_scheme)], restock_body: ProductRestock, id: int):
+    restock_product(token, restock_body, id)
+    return JSONResponse(status_code=200, content={"message": "Product succesfully restocked"})
 
 @router.delete("/delete-listing")
 async def delete_product_r(token: Annotated[str, Depends(oauth2_scheme)], id: int):
