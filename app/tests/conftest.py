@@ -55,3 +55,7 @@ def client(test_session):
         yield c
 
     app.dependency_overrides.clear()
+
+@pytest.fixture(autouse=True)
+def set_bcrypt_rounds(monkeypatch):
+    monkeypatch.setenv("BCRYPT_ROUNDS", "4")
