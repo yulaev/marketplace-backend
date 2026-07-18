@@ -1,5 +1,5 @@
 import pytest
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, event, select
 from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
 import os
@@ -59,3 +59,13 @@ def client(test_session):
 @pytest.fixture(autouse=True)
 def set_bcrypt_rounds(monkeypatch):
     monkeypatch.setenv("BCRYPT_ROUNDS", "4")
+
+@pytest.fixture()
+def set_up_get_token(client):
+    user_data = {"name": "foo", "password": "1234", "email": "foobar@gmail.com", "role": "customer"}
+    client.post("users/sign-up", json=user_data)
+
+    auth_data = {"username": "foo", "password": "1234"}
+    body = client.post("users/sign-in", data=auth_data)
+    token_json = body.json()
+    return token_json["access_token"]
