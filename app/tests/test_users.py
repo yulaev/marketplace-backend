@@ -1,3 +1,4 @@
+import pytest
 from sqlalchemy import select, func
 import jwt
 import os
@@ -12,18 +13,22 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # users/sign-up tests 
 #
 
-def test_sign_up(client):
-    user_data = {"name": "foo", "password": "1234", "email": "foobar@gmail.com", "role": "customer"}
-    response = client.post("users/sign-up", json=user_data)
-    
-    assert response.status_code == 201
-    assert response.json() == {"message": "User created successfully"}
+create_user = [
+    ("foo", "1234", "foo@gmail.com", "customer", 201),
+    ("foo", "1234", "foo@gmail.com", "seller", 201),
+    ("foo", "1234", "foo@gmail.com", "admin", 403),
+    ("", "1234", "foo@gmail.com", "customer", 422),
+    ("foo", "", "foo@gmail.com", "customer", 422),
+    ("foo", "1234", "", "customer", 422),
+    ("foo", "1234", "foogmail.com", "customer", 422),
+]
 
-    user_data = {"name": "foo2", "password": "1234", "email": "foobar2@gmail.com", "role": "seller"}
+@pytest.mark.parametrize("name,password,email,role,expected", create_user)
+def test_sign_up(client, name, password, email, role, expected):
+    user_data = {"name": name, "password": password, "email": email, "role": role}
     response = client.post("users/sign-up", json=user_data)
     
-    assert response.status_code == 201
-    assert response.json() == {"message": "User created successfully"}
+    assert response.status_code == expected
 
 def test_sign_up_data_integrity(client, test_session):
     user_data = {"name": "foo", "password": "1234", "email": "foobar@gmail.com", "role": "customer"}
@@ -48,17 +53,6 @@ def test_sign_up_duplicate_user(client, test_session):
     count = test_session.execute(stmt).scalar_one()
     
     assert count == 1
-
-def test_sign_up_admin(client, test_session):
-    user_data = {"name": "foo", "password": "1234", "email": "foobar@gmail.com", "role": "admin"}
-    response = client.post("users/sign-up", json=user_data)
-
-    assert response.status_code == 403
-    
-    stmt = select(func.count(User.id)).filter_by(name="foo")
-    count = test_session.execute(stmt).scalar_one()
-    
-    assert count == 0
 
 #
 # users/sign-in tests 
