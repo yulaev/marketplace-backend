@@ -1,9 +1,9 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from app.models import UserRole
 
 class UserCreate(BaseModel):
-    name: str
-    password: str
+    name: str = Field(min_length=2)
+    password: str = Field(min_length=4)
     email: EmailStr
     role: UserRole = UserRole.customer
 
