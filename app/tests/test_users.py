@@ -139,7 +139,7 @@ def test_edit_user_other_than_yourself(client, test_session):
 
     assert response.status_code == 403
 
-def test_edit_user_doesnt_exist(client, test_session):
+def test_edit_user_doesnt_exist(client):
     user_data = {"name": "foo", "password": "1234", "email": "foobar@gmail.com", "role": "customer"}
     client.post("users/sign-up", json=user_data)
     
@@ -212,7 +212,7 @@ def test_delete_user_other_than_yourself(client, test_session):
 
     assert count == 1
     
-def test_delete_user_doesnt_exist(client, test_session):
+def test_delete_user_doesnt_exist(client):
     user_data = {"name": "foo", "password": "1234", "email": "foobar@gmail.com", "role": "customer"}
     client.post("users/sign-up", json=user_data)
     
