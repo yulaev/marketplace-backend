@@ -18,5 +18,5 @@ class UserPublic(BaseModel):
 
 class UserEdit(BaseModel):
     id: int
-    name: str | None = None
-    email: str | None = None
+    name: str | None = Field(default=None, min_length=2)
+    email: EmailStr | None = None
