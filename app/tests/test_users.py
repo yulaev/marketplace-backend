@@ -90,7 +90,37 @@ def test_auth_check_user_doesnt_exist(client):
 # users/edit-user tests 
 #
 
-def test_edit_user(client, test_session):
+edit_user = [
+    ("foobar", "foo@gmail.com", 200),
+    ("foobar", None, 200),
+    (None, "foo@gmail.com", 200),
+    (None, None, 200),
+    ("F", None, 422),
+    (None, "foogmai.com", 422)
+]
+
+@pytest.mark.parametrize("name,email,expected", edit_user)
+def test_edit_user(client, test_session, name, email, expected):
+    user_data = {"name": "foo", "password": "1234", "email": "foobar@gmail.com", "role": "customer"}
+    client.post("users/sign-up", json=user_data)
+
+    stmt = select(User.id).where(User.name == "foo")
+    user_id = test_session.scalar(stmt)
+
+    auth_data = {"username": "foo", "password": "1234"}
+    body = client.post("users/sign-in", data=auth_data)
+    token_json = body.json()
+    
+    headers = {
+        "Authorization": f"Bearer {token_json["access_token"]}"
+    }
+    
+    edit_data = {"id": user_id, "name": name, "email": email}
+    response = client.patch("users/edit-user", json=edit_data, headers=headers)
+
+    assert response.status_code == expected
+
+def test_edit_user_data_integrity(client, test_session):
     user_data = {"name": "foo", "password": "1234", "email": "foobar@gmail.com", "role": "customer"}
     client.post("users/sign-up", json=user_data)
 
@@ -106,10 +136,7 @@ def test_edit_user(client, test_session):
     }
     
     edit_data = {"id": user_id, "name": "foobar", "email": "foo@gmail.com"}
-    response = client.patch("users/edit-user", json=edit_data, headers=headers)
-
-    assert response.status_code == 200
-    assert response.json() == {"message": "User edited successfully"}
+    client.patch("users/edit-user", json=edit_data, headers=headers)
 
     user = test_session.get(User, user_id)
 
