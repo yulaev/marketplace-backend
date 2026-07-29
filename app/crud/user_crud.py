@@ -58,7 +58,7 @@ def edit_user(token: Annotated[str, Depends(oauth2_scheme)], edit_body: UserEdit
     if payload.get("sub") != user.name:
         raise HTTPException(status_code=403, detail="You are forbidden from performing this operation")
     
-    edit_user = edit_body.model_dump(exclude_unset=True)
+    edit_user = edit_body.model_dump(exclude_none=True, exclude_unset=True)
     for key, value, in edit_user.items():
         setattr(user, key, value)
 
