@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from decimal import Decimal
 
 class ProductCreate(BaseModel):
-    name: str
+    name: str = Field(min_length=2)
     description: str | None = None
     price: Decimal = Field(ge=0)
     quantity: int = Field(default=1, ge=1)
