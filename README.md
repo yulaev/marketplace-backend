@@ -166,6 +166,8 @@ curl -X PATCH http://localhost:8000/orders/place-order \
 |---|---|
 | `DATABASE_URL` | PostgreSQL connection string |
 | `SECRET_KEY` | Secret used to sign JWTs — generate with `secrets.token_hex(32)` |
+| `TEST_DB` | Separate database to run the test suite |
+| `BSCRYPT_ROUNDS` | Not crucial but speeds up the test suite significantly if changed to a smaller value like 4 with pytests monkeypatch |
 
 See `.env.example`
 
