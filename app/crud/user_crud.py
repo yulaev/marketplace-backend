@@ -8,7 +8,7 @@ import os
 from dotenv import load_dotenv
 
 from app.schemas import UserCreate, UserEdit, UserPublic
-from app.models import User, UserRole
+from app.models import User, UserRole, Product
 from app.utilities import oauth2_scheme, get_access_token, authenticate_user, validate_token
 
 load_dotenv()
@@ -71,7 +71,11 @@ def delete_user(token: Annotated[str, Depends(oauth2_scheme)], id: int, session:
         raise HTTPException(status_code=404, detail="User not found")
     if payload.get("sub") != user.name:
         raise HTTPException(status_code=403, detail="You are forbidden from performing this operation")
-    
+
+    has_listings = session.scalar(select(Product.id).where(Product.seller_id == id))
+    if has_listings:
+        raise HTTPException(status_code=409, detail="Cannot delete a seller user with active listings")
+
     session.delete(user)
     session.commit()
 

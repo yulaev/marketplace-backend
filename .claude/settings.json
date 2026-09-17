@@ -1,0 +1,20 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Edit|Write|NotebookEdit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/branch_policy.py\""
+          }
+        ]
+      }
+    ]
+  },
+
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  }
+}
