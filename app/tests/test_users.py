@@ -239,6 +239,33 @@ def test_delete_user_other_than_yourself(client, test_session):
 
     assert count == 1
     
+def test_delete_user_with_active_listings(client, test_session):
+    user_data = {"name": "foo", "password": "1234", "email": "foobar@gmail.com", "role": "seller"}
+    client.post("users/sign-up", json=user_data)
+
+    stmt = select(User.id).where(User.name == "foo")
+    user_id = test_session.scalar(stmt)
+
+    auth_data = {"username": "foo", "password": "1234"}
+    body = client.post("users/sign-in", data=auth_data)
+    token_json = body.json()
+
+    headers = {
+        "Authorization": f"Bearer {token_json["access_token"]}"
+    }
+
+    product_data = {"name": "foo", "description": "description", "price": 10.99, "quantity": 10}
+    client.post("products/create-product", json=product_data, headers=headers)
+
+    response = client.delete(f"users/delete-user?id={user_id}", headers=headers)
+
+    assert response.status_code == 409
+
+    stmt = select(func.count(User.id)).where(User.id == user_id)
+    count = test_session.scalar(stmt)
+
+    assert count == 1
+
 def test_delete_user_doesnt_exist(client):
     user_data = {"name": "foo", "password": "1234", "email": "foobar@gmail.com", "role": "customer"}
     client.post("users/sign-up", json=user_data)
