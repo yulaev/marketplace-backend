@@ -13,4 +13,4 @@ class ProductEdit(BaseModel):
     price: Decimal | None = Field(default=None, gt=0)
 
 class ProductRestock(BaseModel):
-    quantity: int = Field(default=None)
+    quantity: int
